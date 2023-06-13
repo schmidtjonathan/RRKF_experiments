@@ -257,7 +257,7 @@ for cur_nval in nval_list
     cur_etkf_rmse_to_truth_per_etkf_loop = Float64[]
     cur_etkf_rmse_to_kf_per_etkf_loop = Float64[]
     cur_etkf_cov_distance_per_etkf_loop = Float64[]
-    for enkf_loop in 1:20
+    for enkf_loop in 1:2  #  20
         cur_enkf_sol = run_LA_enkf(current_setup)
         cur_enkf_means = RRKF.means(cur_enkf_sol)
 
@@ -293,7 +293,7 @@ end
 
 
 save(
-    "./out/LA_error_data-20_enkf_runs.jld2",
+    "./out/LA_error_data.jld2",
     Dict(
         "nval_list" => float(nval_list),
         "rrkf" => Dict(

@@ -9,10 +9,6 @@ using Distributions
 using KernelFunctions
 using Statistics
 using StatsBase
-using Optimization
-using OptimizationOptimJL
-using OptimizationBBO
-using LineSearches
 using SparseArrays
 using JLD2
 using RRKF
@@ -203,7 +199,7 @@ for cur_nval in nval_list
     cur_etkf_rmse_to_test_per_etkf_loop = Float64[]
     cur_etkf_rmse_to_kf_per_etkf_loop = Float64[]
     cur_etkf_cov_distance_per_etkf_loop = Float64[]
-    for enkf_loop in 1:20
+    for enkf_loop in 1:2 # 20
 
         cur_enkf_estim = RRKF.estimate_states(
             RRKF.EnsembleKalmanFilter(cur_nval, RRKF.enkf_correct),
@@ -259,10 +255,8 @@ for cur_nval in nval_list
 end
 
 
-
-
 save(
-    "./out/london_error_data-20-enkf-runs.jld2",
+    "./out/london_error_data.jld2",
     Dict(
         "nval_list" => float(nval_list),
         "rrkf" => Dict(

@@ -204,7 +204,7 @@ function evaluation_for_spatial_lengthscale(ℓₓ)
         cur_etkf_rmse_to_truth_per_etkf_loop = Float64[]
         cur_etkf_rmse_to_kf_per_etkf_loop = Float64[]
         cur_etkf_cov_distance_per_etkf_loop = Float64[]
-        for enkf_loop in 1:20
+        for enkf_loop in 1:2  # 20
             cur_enkf_estimate = RRKF.estimate_states(
                 RRKF.EnsembleKalmanFilter(cur_nval, RRKF.enkf_correct),
                 ssm,
