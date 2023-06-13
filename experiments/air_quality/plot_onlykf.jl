@@ -64,13 +64,13 @@ fig = begin
     )
 
 
-    skf_rmse_to_kf = loaded_results["skf"]["rmse_to_kf"]
+    rrkf_rmse_to_kf = loaded_results["rrkf"]["rmse_to_kf"]
     enkf_rmse_to_kf = [mean(res) for res in loaded_results["enkf"]["rmse_to_kf"]]
     etkf_rmse_to_kf = [mean(res) for res in loaded_results["etkf"]["rmse_to_kf"]]
     enkf_rmse_to_kf_std = [std(res) for res in loaded_results["enkf"]["rmse_to_kf"]]
     etkf_rmse_to_kf_std = [std(res) for res in loaded_results["etkf"]["rmse_to_kf"]]
 
-    skf_cov_distance = loaded_results["skf"]["cov_distance"]
+    rrkf_cov_distance = loaded_results["rrkf"]["cov_distance"]
     enkf_cov_distance = [mean(res) for res in loaded_results["enkf"]["cov_distance"]]
     etkf_cov_distance = [mean(res) for res in loaded_results["etkf"]["cov_distance"]]
     enkf_cov_distance_std = [std(res) for res in loaded_results["enkf"]["cov_distance"]]
@@ -107,10 +107,10 @@ fig = begin
         color=COLORS[1]
     )
 
-    skf_legend_handle = scatterlines!(
+    rrkf_legend_handle = scatterlines!(
         ax_rmse_kf,
         loaded_results["nval_list"],
-        skf_rmse_to_kf,
+        rrkf_rmse_to_kf,
         marker=:diamond, color=COLORS[3]
     )
 
@@ -146,14 +146,14 @@ fig = begin
     scatterlines!(
         ax_cov_dist,
         loaded_results["nval_list"],
-        skf_cov_distance,
+        rrkf_cov_distance,
         marker=:diamond, color=COLORS[3]
     )
 
     CairoMakie.scatter!(
         ax_rmse_kf,
         loaded_results["nval_list"][end:end],
-        loaded_results["skf"]["rmse_to_kf"][end:end],
+        loaded_results["rrkf"]["rmse_to_kf"][end:end],
         marker=:diamond,
         color=COLORS[4],
         strokecolor=:black,
@@ -165,7 +165,7 @@ fig = begin
     CairoMakie.scatter!(
         ax_cov_dist,
         loaded_results["nval_list"][end:end],
-        loaded_results["skf"]["cov_distance"][end:end],
+        loaded_results["rrkf"]["cov_distance"][end:end],
         marker=:diamond,
         color=COLORS[4],
         strokecolor=:black,
@@ -178,8 +178,8 @@ fig = begin
     xlims!(ax_rmse_kf, high=153)
     xlims!(ax_cov_dist, high=153)
 
-    # Legend(grid_plot[1, 4], [skf_legend_handle, enkf_legend_handle, etkf_legend_handle, kf_legend_handle], ["ours", "EnKF", "dEnKF", "KF"])
-    Legend(grid_plot[1, 3], [skf_legend_handle, enkf_legend_handle, etkf_legend_handle], [rich(rich("RRKF", font="Times New Roman bold"), "\n", rich("(ours)", font="Times New Roman bold", offset = (0.0, 1.0))), "EnKF", "ETKF"])#, position=(-4.0, -1.0))
+    # Legend(grid_plot[1, 4], [rrkf_legend_handle, enkf_legend_handle, etkf_legend_handle, kf_legend_handle], ["ours", "EnKF", "dEnKF", "KF"])
+    Legend(grid_plot[1, 3], [rrkf_legend_handle, enkf_legend_handle, etkf_legend_handle], [rich(rich("RRKF", font="Times New Roman bold"), "\n", rich("(ours)", font="Times New Roman bold", offset = (0.0, 1.0))), "EnKF", "ETKF"])#, position=(-4.0, -1.0))
 
     ax_rmse_kf.ylabel = "RMSE"
     # ax_rmse_kf.ylabel = "RMSE to KF"

@@ -93,17 +93,17 @@ fig = begin
                         color=COLORS[1]
         )
 
-        _skfline = scatterlines!(
+        _rrkfline = scatterlines!(
             rmse_axes[end],
             loaded_results["nval_list"],
-            loaded_results["eval_results"][plot_i]["skf"]["rmse_to_kf"],
+            loaded_results["eval_results"][plot_i]["rrkf"]["rmse_to_kf"],
             label="SKF",
             marker=:diamond,             color=COLORS[3], zorder=10
         )
         lastpoint_legend_handle = CairoMakie.scatter!(
             rmse_axes[end],
             loaded_results["nval_list"][end:end],
-            loaded_results["eval_results"][plot_i]["skf"]["rmse_to_kf"][end:end],
+            loaded_results["eval_results"][plot_i]["rrkf"]["rmse_to_kf"][end:end],
             label="SKF",
             marker=:diamond,
             color=COLORS[4],
@@ -115,7 +115,7 @@ fig = begin
         )
 
         if plot_i == 1
-            push!(legend_handles, _skfline)
+            push!(legend_handles, _rrkfline)
             # push!(legend_handles, lastpoint_legend_handle)
             push!(legend_handles, _enkfline)
             push!(legend_handles, _etkfline)
@@ -189,14 +189,14 @@ fig = begin
         scatterlines!(
             covdist_axes[end],
             loaded_results["nval_list"],
-            loaded_results["eval_results"][plot_i]["skf"]["cov_distance"],
+            loaded_results["eval_results"][plot_i]["rrkf"]["cov_distance"],
             label="SKF",
             marker=:diamond, color=COLORS[3], zorder=10
         )
         CairoMakie.scatter!(
             covdist_axes[end],
             loaded_results["nval_list"][end:end],
-            loaded_results["eval_results"][plot_i]["skf"]["cov_distance"][end:end],
+            loaded_results["eval_results"][plot_i]["rrkf"]["cov_distance"][end:end],
             label="SKF",
             marker=:diamond,
             color=COLORS[4],

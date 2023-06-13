@@ -83,8 +83,8 @@ fig = begin
     )
 
     kf_legend_handle = lines!(ax_rmse_truth, loaded_LA_results["nval_list"], loaded_LA_results["kf"]["rmse_to_truth"], color=COLORS[4], label="KF")
-    # lines!(ax_rmse_truth, loaded_LA_results["nval_list"], loaded_LA_results["skf"]["rmse_to_truth"])
-    skf_legend_handle = scatterlines!(ax_rmse_truth, loaded_LA_results["nval_list"], loaded_LA_results["skf"]["rmse_to_truth"], label="SKF", marker=:diamond, color=COLORS[3])
+    # lines!(ax_rmse_truth, loaded_LA_results["nval_list"], loaded_LA_results["rrkf"]["rmse_to_truth"])
+    rrkf_legend_handle = scatterlines!(ax_rmse_truth, loaded_LA_results["nval_list"], loaded_LA_results["rrkf"]["rmse_to_truth"], label="SKF", marker=:diamond, color=COLORS[3])
     # lines!(ax_rmse_truth, loaded_LA_results["nval_list"], loaded_LA_results["enkf"]["rmse_to_truth"])
     enkf_legend_handle = scatterlines!(ax_rmse_truth, loaded_LA_results["nval_list"], loaded_LA_results["enkf"]["rmse_to_truth"], label="EnKF", marker=:rect, color=COLORS[2])
     # lines!(ax_rmse_truth, loaded_LA_results["nval_list"], loaded_LA_results["etkf"]["rmse_to_truth"])
@@ -92,22 +92,22 @@ fig = begin
 
     ylims!(ax_rmse_truth, low=0.0)
 
-    # lines!(ax_rmse_kf, loaded_LA_results["nval_list"], loaded_LA_results["skf"]["rmse_to_kf"])
-    scatterlines!(ax_rmse_kf, loaded_LA_results["nval_list"], loaded_LA_results["skf"]["rmse_to_kf"], label="SKF", marker=:diamond, color=COLORS[3])
+    # lines!(ax_rmse_kf, loaded_LA_results["nval_list"], loaded_LA_results["rrkf"]["rmse_to_kf"])
+    scatterlines!(ax_rmse_kf, loaded_LA_results["nval_list"], loaded_LA_results["rrkf"]["rmse_to_kf"], label="SKF", marker=:diamond, color=COLORS[3])
     # lines!(ax_rmse_kf, loaded_LA_results["nval_list"], loaded_LA_results["enkf"]["rmse_to_kf"])
     scatterlines!(ax_rmse_kf, loaded_LA_results["nval_list"], loaded_LA_results["enkf"]["rmse_to_kf"], label="EnKF", marker=:rect, color=COLORS[2])
     # lines!(ax_rmse_kf, loaded_LA_results["nval_list"], loaded_LA_results["etkf"]["rmse_to_kf"])
     scatterlines!(ax_rmse_kf, loaded_LA_results["nval_list"], loaded_LA_results["etkf"]["rmse_to_kf"], label="etkf", color=COLORS[1])
 
-    # lines!(ax_cov_dist, loaded_LA_results["nval_list"], loaded_LA_results["skf"]["cov_distance"])
-    scatterlines!(ax_cov_dist, loaded_LA_results["nval_list"], loaded_LA_results["skf"]["cov_distance"], label="SKF", marker=:diamond, color=COLORS[3])
+    # lines!(ax_cov_dist, loaded_LA_results["nval_list"], loaded_LA_results["rrkf"]["cov_distance"])
+    scatterlines!(ax_cov_dist, loaded_LA_results["nval_list"], loaded_LA_results["rrkf"]["cov_distance"], label="SKF", marker=:diamond, color=COLORS[3])
     # lines!(ax_cov_dist, loaded_LA_results["nval_list"], loaded_LA_results["enkf"]["cov_distance"])
     scatterlines!(ax_cov_dist, loaded_LA_results["nval_list"], loaded_LA_results["enkf"]["cov_distance"], label="EnKF", marker=:rect, color=COLORS[2])
     # lines!(ax_cov_dist, loaded_LA_results["nval_list"], loaded_LA_results["etkf"]["cov_distance"])
     scatterlines!(ax_cov_dist, loaded_LA_results["nval_list"], loaded_LA_results["etkf"]["cov_distance"], label="etkf", color=COLORS[1])
 
-    # axislegend(ax_rmse_truth, [skf_legend_handle, enkf_legend_handle, etkf_legend_handle, kf_legend_handle], ["ours", "EnKF", "ETKF", "KF"], position=(2.5, -10.25))
-    Legend(grid_plot[1, 4], [skf_legend_handle, enkf_legend_handle, etkf_legend_handle, kf_legend_handle], ["ours", "EnKF", "ETKF", "KF"])
+    # axislegend(ax_rmse_truth, [rrkf_legend_handle, enkf_legend_handle, etkf_legend_handle, kf_legend_handle], ["ours", "EnKF", "ETKF", "KF"], position=(2.5, -10.25))
+    Legend(grid_plot[1, 4], [rrkf_legend_handle, enkf_legend_handle, etkf_legend_handle, kf_legend_handle], ["ours", "EnKF", "ETKF", "KF"])
 
     # Label(
     #     grid_plot[1, 1, TopLeft()],
