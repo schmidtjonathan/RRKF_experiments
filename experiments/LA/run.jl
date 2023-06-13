@@ -293,7 +293,7 @@ end
 
 
 save(
-    "./out/LA_error_data.jld2",
+    "./out/LA_results.jld2",
     Dict(
         "nval_list" => float(nval_list),
         "rrkf" => Dict(

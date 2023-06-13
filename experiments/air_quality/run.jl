@@ -4,7 +4,6 @@ using Revise
 
 using LinearAlgebra
 using Random
-using Plots
 using Distributions
 using KernelFunctions
 using Statistics
@@ -256,7 +255,7 @@ end
 
 
 save(
-    "./out/london_error_data.jld2",
+    "./out/london_results.jld2",
     Dict(
         "nval_list" => float(nval_list),
         "rrkf" => Dict(
