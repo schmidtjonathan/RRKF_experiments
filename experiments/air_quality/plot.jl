@@ -7,7 +7,7 @@ CairoMakie.activate!(type = "svg")
 
 cd("/home/jschmidt/.julia/dev/SpectralKF/experiments/air_quality")
 
-loaded_results = load("./out_new/london_error_data-20-enkf-runs.jld2")
+loaded_results = load("./out_new/london_error_data.jld2")
 
 
 include("../plot_theme.jl")
