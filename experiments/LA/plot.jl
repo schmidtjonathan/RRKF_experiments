@@ -198,17 +198,13 @@ fig = begin
 
 
 
-    # xlims!(ax_rmse_truth, high=105)
     xlims!(ax_rmse_kf, high=110)
     xlims!(ax_cov_dist, high=110)
 
     ax_rmse_kf.ylabel = "RMSE"
-    # ax_rmse_kf.ylabel = "RMSE to KF"
-    ax_cov_dist.ylabel = "Frobenius distance" # rich("Frobenius", "\n", rich("distance", offset = (0.0, 1.0)))
+    ax_cov_dist.ylabel = "Frobenius distance"
     ax_rmse_kf.xlabelpadding=0.0
     ax_cov_dist.xlabelpadding=0.0
-    # colsize!(grid_plot.layout, 1, Auto(0.5))
-    # colsize!(grid_plot.layout, 2, Auto(0.5))
 
     colgap!(grid_plot.layout, 8.0)
     Label(grid_plot[1, :, Bottom()], "low-rank dimension ", fontsize=BASE_FONTSIZE-1, font="Times New Roman regular", halign = :center, valign=:top, padding=(0, 0, 0, 15))
