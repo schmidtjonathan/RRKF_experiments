@@ -215,4 +215,4 @@ fig = begin
 end
 
 display(fig)
-save("./out_new/LA_grid_plot_onlykf.pdf", grid_plot, pt_per_unit = 1)
+save("./out/LA_results.pdf", grid_plot, pt_per_unit = 1)
