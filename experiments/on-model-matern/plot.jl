@@ -6,10 +6,10 @@ using LaTeXStrings
 
 CairoMakie.activate!(type = "svg")
 
-cd("/home/jschmidt/.julia/dev/SpectralKF/experiments/correct_st_model/")
+cd("./experiments/on-model-matern/")
 
 
-loaded_results = load("./out_new/on-model_error_data_matern12.jld2")
+loaded_results = load("./out/on-model_error_data_matern12.jld2")
 
 
 include("../plot_theme.jl")
@@ -27,15 +27,12 @@ fig = begin
 
     rmse_axes = []
     covdist_axes = []
-    # spec_axes = []
     legend_handles = []
     for (plot_i, cur_lx) in enumerate(loaded_results["spatial_lengthscale_list"])
         push!(
             rmse_axes,
             Axis(
                 grid_plot[1, plot_i],
-                # title=L"\ell_x = %$cur_lx",
-                # yscale=log10,
                 xticks=round.(Int, LinRange(1, loaded_results["nval_list"][end], 5)),
                 xtrimspine=true,
                 ytrimspine=(true, false),
@@ -110,13 +107,10 @@ fig = begin
             strokecolor=:black,
             strokewidth=0.5,
             zorder=10,
-            # glowwidth=20,
-            # glowcolor=PN_COLORS[1],
         )
 
         if plot_i == 1
             push!(legend_handles, _rrkfline)
-            # push!(legend_handles, lastpoint_legend_handle)
             push!(legend_handles, _enkfline)
             push!(legend_handles, _etkfline)
             push!(legend_handles, spectrum_legendhandle)
@@ -137,7 +131,6 @@ fig = begin
                 xticklabelsvisible=true,
                 aspect=1.5,
                 xlabel="low-rank dim.",
-                # title="vs. KF covariance",
                 titlesize=BASE_FONTSIZE-3,
                 titlegap=0.1,
                 titlealign=:left,
@@ -145,7 +138,6 @@ fig = begin
         )
         lines!(
             covdist_axes[end],
-            # loaded_results["nval_list"],
             cumsum(loaded_results["eval_results"][plot_i]["spectrum"]["kf_cov"]) / sum(loaded_results["eval_results"][plot_i]["spectrum"]["kf_cov"]),
             color=:grey80,
             linewidth=1.5,
@@ -203,52 +195,29 @@ fig = begin
             strokecolor=:black,
             strokewidth=0.5,
             zorder=10,
-            # glowwidth=20,
-            # glowcolor=PN_COLORS[1],
         )
 
 
     end
 
     Legend(grid_plot[0, :], legend_handles, [rich("RRKF (ours)", font="Times New Roman bold"), "EnKF", "ETKF", "cumulative spectrum"], orientation=:horizontal)
-    # axislegend(rmse_axes[begin], legend_handles, ["ours", "EnKF", "ETKF"], framevisible = true, rowgap=0, colgap=0, framewidth=0.5, position=(5.0, 2.0))
-
 
     rmse_axes[begin].ylabel = "RMSE"
     covdist_axes[begin].ylabel = rich("Frobenius", "\n", rich("distance", offset = (0.0, 1.0)))
-    # spec_axes[begin].ylabel = "Cumulative\nspectrum"
-    # Label(
-    #     grid_plot[3, 1, Left()],
-    #     "Spectrum",
-    #     # font = "Times New Roman bold",
-    #     padding = (0, 30, 0, 0),
-    #     rotation=π/2
-    # )
 
-    # linkyaxes!(spec_axes...)
     linkyaxes!(rmse_axes...)
     linkyaxes!(covdist_axes...)
-    # hidespines!(spec_axes[2], :l)
-    # hidespines!(spec_axes[3], :l)
-    # hidespines!(spec_axes[4], :l)
 
-    # colsize!(grid_plot.layout, 1, Auto(0.22))
-    # colsize!(grid_plot.layout, 2, Auto(0.27))
-    # colsize!(grid_plot.layout, 3, Auto(0.27))
-    # colsize!(grid_plot.layout, 4, Auto(0.27))
 
     rowgap!(grid_plot.layout, 8.0)
     rowgap!(grid_plot.layout, 1, 8.0)
-    # rowgap!(grid_plot.layout, 2, 0.0)
     colgap!(grid_plot.layout, 5.0)
-
-    # resize_to_layout!(grid_plot)
 
     grid_plot
 end
 
 display(fig)
-save("./out_new/on-model_grid_plot_matern12_reduced_cramped.pdf", fig, pt_per_unit = 1)
+save("./out/on-model_results_matern12.pdf", fig, pt_per_unit = 1)
 
 
 

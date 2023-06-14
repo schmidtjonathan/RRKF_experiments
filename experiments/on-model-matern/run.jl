@@ -15,6 +15,8 @@ using JLD2
 using RRKF
 
 
+include("plotting.jl")
+
 nanmean(x) = mean(Base.filter(!isnan, x))
 nanrmse(a, b) = sqrt(nanmean((a - b).^2))
 
@@ -297,11 +299,12 @@ end
 eval_results = []
 for cur_lx in ℓₓ_list
     push!(eval_results, evaluation_for_spatial_lengthscale(cur_lx))
+    GC.gc()
 end
 
 
 save(
-    "./out/on-model_error_data_matern12.jld2",
+    "./out/on-model_results_matern12.jld2",
     Dict(
         "nval_list" => float(nval_list),
         "spatial_lengthscale_list" => ℓₓ_list,
