@@ -1,6 +1,7 @@
-cd("./experiments/LA")
+cd("./experiments/err_runtime")
 
 using LinearAlgebra
+using MKL
 using Distributions
 using Random
 using ForwardDiff
@@ -9,6 +10,7 @@ using KernelFunctions
 using StatsBase
 using ToeplitzMatrices
 using JLD2
+using BenchmarkTools
 
 using RRKF
 
@@ -98,7 +100,7 @@ function run_LA_kf(setup_tuple)
     RRKF.append_step!(filter_sol, previous_t, m , P)
 
     obs_seen_counter = 0
-    @showprogress 0.1 "KF" for t in times[2:end]
+    for t in times[2:end]
         dt = t - previous_t
         previous_t = t
         m, P = RRKF.kf_predict(m, P, A, zeros(size(A)))
@@ -129,7 +131,7 @@ function run_LA_rrkf(setup_tuple; r, num_dlr_steps)
     RRKF.append_step!(filter_sol, previous_t, m , P_sqrt)
 
     obs_seen_counter = 0
-    @showprogress 0.1 "rrkf" for t in times[2:end]
+    for t in times[2:end]
         dt = t - previous_t
         previous_t = t
 
@@ -164,7 +166,7 @@ function run_LA_enkf(setup_tuple)
 
     obs_seen_counter = 0
     ensemble = copy(init_ensemble)
-    @showprogress 0.1 "EnKF" for t in times[2:end]
+    for t in times[2:end]
         dt = t - previous_t
         previous_t = t
         ensemble = A * ensemble
@@ -196,7 +198,7 @@ function run_LA_etkf(setup_tuple)
 
     obs_seen_counter = 0
     ensemble = copy(init_ensemble)
-    @showprogress 0.1 "ETKF" for t in times[2:end]
+    for t in times[2:end]
         dt = t - previous_t
         previous_t = t
         ensemble = A * ensemble
@@ -221,98 +223,103 @@ nval_list = unique(sort(ceil.(Int64, nval_list)))
 rrkf_rmse_to_truth_per_nval = Float64[]
 rrkf_rmse_to_kf_per_nval = Float64[]
 rrkf_cov_distance_per_nval = Float64[]
-enkf_rmse_to_truth_per_nval = Vector{Float64}[]
-enkf_rmse_to_kf_per_nval = Vector{Float64}[]
-enkf_cov_distance_per_nval = Vector{Float64}[]
-etkf_rmse_to_truth_per_nval = Vector{Float64}[]
-etkf_rmse_to_kf_per_nval = Vector{Float64}[]
-etkf_cov_distance_per_nval = Vector{Float64}[]
+enkf_rmse_to_truth_per_nval = Float64[]
+enkf_rmse_to_kf_per_nval = Float64[]
+enkf_cov_distance_per_nval = Float64[]
+etkf_rmse_to_truth_per_nval = Float64[]
+etkf_rmse_to_kf_per_nval = Float64[]
+etkf_cov_distance_per_nval = Float64[]
 
-kf_rmse_to_truth_per_nval = Float64[]
+rrkf_bench_per_nval = BenchmarkTools.Trial[]
+enkf_bench_per_nval = BenchmarkTools.Trial[]
+etkf_bench_per_nval = BenchmarkTools.Trial[]
+
+
+the_setup = filtering_setup_la(ENSEMBLE_SIZE=nval_list[end])
+_m0, _P0, _init_ensemble, _A, _H, _R, _ground_truth, _observations, _times, _obs_times, _obs_locations = the_setup
+kf_sol = @time run_LA_kf(the_setup)
+kf_rmse_to_truth = rmsd(RRKF.means(kf_sol), _ground_truth)
 
 for cur_nval in nval_list
     @info "R = $cur_nval"
     current_setup = filtering_setup_la(ENSEMBLE_SIZE=cur_nval)
     m0, P0, init_ensemble, A, H, R, ground_truth, observations, times, obs_times, obs_locations = current_setup
 
-    cur_kf_sol = run_LA_kf(current_setup)
-    cur_kf_rmse_to_truth = rmsd(RRKF.means(cur_kf_sol), ground_truth)
-    push!(kf_rmse_to_truth_per_nval, cur_kf_rmse_to_truth)
+    # cur_kf_sol = run_LA_kf(current_setup)
+    # cur_kf_rmse_to_truth = rmsd(RRKF.means(cur_kf_sol), ground_truth)
+    # push!(kf_rmse_to_truth_per_nval, cur_kf_rmse_to_truth)
 
     cur_rrkf_sol = run_LA_rrkf(current_setup; r=cur_nval, num_dlr_steps=1)
     cur_rrkf_means = RRKF.means(cur_rrkf_sol);
+    cur_rrkf_trial = @benchmark run_LA_rrkf($current_setup; r=$cur_nval, num_dlr_steps=1)
 
     cur_rrkf_rmse_to_truth = rmsd(cur_rrkf_means, ground_truth)
-    cur_rrkf_rmse_to_kf = rmsd(cur_rrkf_means, RRKF.means(cur_kf_sol))
-    cur_rrkf_cov_distance = mean([norm(Matrix(SC) - Matrix(KC)) / norm(Matrix(KC)) for (SC, KC) in zip(cur_rrkf_sol.Σ, cur_kf_sol.Σ)])
+    cur_rrkf_rmse_to_kf = rmsd(cur_rrkf_means, RRKF.means(kf_sol))
+    cur_rrkf_cov_distance = mean([norm(Matrix(SC) - Matrix(KC)) / norm(Matrix(KC)) for (SC, KC) in zip(cur_rrkf_sol.Σ, kf_sol.Σ)])
 
     push!(rrkf_rmse_to_truth_per_nval, cur_rrkf_rmse_to_truth)
     push!(rrkf_rmse_to_kf_per_nval, cur_rrkf_rmse_to_kf)
     push!(rrkf_cov_distance_per_nval, cur_rrkf_cov_distance)
 
-    cur_enkf_rmse_to_truth_per_enkf_loop = Float64[]
-    cur_enkf_rmse_to_kf_per_enkf_loop = Float64[]
-    cur_enkf_cov_distance_per_enkf_loop = Float64[]
 
-    cur_etkf_rmse_to_truth_per_etkf_loop = Float64[]
-    cur_etkf_rmse_to_kf_per_etkf_loop = Float64[]
-    cur_etkf_cov_distance_per_etkf_loop = Float64[]
-    for enkf_loop in 1:2  #  20
-        cur_enkf_sol = run_LA_enkf(current_setup)
-        cur_enkf_means = RRKF.means(cur_enkf_sol)
+    cur_enkf_sol = run_LA_enkf(current_setup)
+    cur_enkf_means = RRKF.means(cur_enkf_sol)
+    cur_enkf_trial = @benchmark run_LA_enkf($current_setup)
 
-        cur_enkf_rmse_to_truth = rmsd(cur_enkf_means, ground_truth)
-        cur_enkf_rmse_to_kf = rmsd(cur_enkf_means, RRKF.means(cur_kf_sol))
-        cur_enkf_cov_distance = mean([norm(Matrix(SC) - Matrix(KC)) / norm(Matrix(KC)) for (SC, KC) in zip(cur_enkf_sol.Σ, cur_kf_sol.Σ)])
+    cur_enkf_rmse_to_truth = rmsd(cur_enkf_means, ground_truth)
+    cur_enkf_rmse_to_kf = rmsd(cur_enkf_means, RRKF.means(kf_sol))
+    cur_enkf_cov_distance = mean([norm(Matrix(SC) - Matrix(KC)) / norm(Matrix(KC)) for (SC, KC) in zip(cur_enkf_sol.Σ, kf_sol.Σ)])
 
-        push!(cur_enkf_rmse_to_truth_per_enkf_loop, cur_enkf_rmse_to_truth)
-        push!(cur_enkf_rmse_to_kf_per_enkf_loop, cur_enkf_rmse_to_kf)
-        push!(cur_enkf_cov_distance_per_enkf_loop, cur_enkf_cov_distance)
+    push!(enkf_rmse_to_truth_per_nval, cur_enkf_rmse_to_truth)
+    push!(enkf_rmse_to_kf_per_nval, cur_enkf_rmse_to_kf)
+    push!(enkf_cov_distance_per_nval, cur_enkf_cov_distance)
 
 
-        cur_etkf_sol = run_LA_etkf(current_setup)
-        cur_etkf_means = RRKF.means(cur_etkf_sol)
+    cur_etkf_sol = run_LA_etkf(current_setup)
+    cur_etkf_means = RRKF.means(cur_etkf_sol)
+    cur_etkf_trial = @benchmark run_LA_etkf($current_setup)
 
-        cur_etkf_rmse_to_truth = rmsd(cur_etkf_means, ground_truth)
-        cur_etkf_rmse_to_kf = rmsd(cur_etkf_means, RRKF.means(cur_kf_sol))
-        cur_etkf_cov_distance = mean([norm(Matrix(SC) - Matrix(KC)) / norm(Matrix(KC)) for (SC, KC) in zip(cur_etkf_sol.Σ, cur_kf_sol.Σ)])
+    cur_etkf_rmse_to_truth = rmsd(cur_etkf_means, ground_truth)
+    cur_etkf_rmse_to_kf = rmsd(cur_etkf_means, RRKF.means(kf_sol))
+    cur_etkf_cov_distance = mean([norm(Matrix(SC) - Matrix(KC)) / norm(Matrix(KC)) for (SC, KC) in zip(cur_etkf_sol.Σ, kf_sol.Σ)])
 
-        push!(cur_etkf_rmse_to_truth_per_etkf_loop, cur_etkf_rmse_to_truth)
-        push!(cur_etkf_rmse_to_kf_per_etkf_loop, cur_etkf_rmse_to_kf)
-        push!(cur_etkf_cov_distance_per_etkf_loop, cur_etkf_cov_distance)
+    push!(etkf_rmse_to_truth_per_nval, cur_etkf_rmse_to_truth)
+    push!(etkf_rmse_to_kf_per_nval, cur_etkf_rmse_to_kf)
+    push!(etkf_cov_distance_per_nval, cur_etkf_cov_distance)
 
-    end
-    push!(enkf_rmse_to_truth_per_nval, cur_enkf_rmse_to_truth_per_enkf_loop)
-    push!(enkf_rmse_to_kf_per_nval, cur_enkf_rmse_to_kf_per_enkf_loop)
-    push!(enkf_cov_distance_per_nval, cur_enkf_cov_distance_per_enkf_loop)
-    push!(etkf_rmse_to_truth_per_nval, cur_etkf_rmse_to_truth_per_etkf_loop)
-    push!(etkf_rmse_to_kf_per_nval, cur_etkf_rmse_to_kf_per_etkf_loop)
-    push!(etkf_cov_distance_per_nval, cur_etkf_cov_distance_per_etkf_loop)
+    push!(rrkf_bench_per_nval, cur_rrkf_trial)
+    push!(enkf_bench_per_nval, cur_enkf_trial)
+    push!(etkf_bench_per_nval, cur_etkf_trial)
 
 end
 
 
 save(
-    "./out/LA_results.jld2",
+    "./out/LA_err_runtime.jld2",
     Dict(
         "nval_list" => float(nval_list),
         "rrkf" => Dict(
             "rmse_to_truth" => rrkf_rmse_to_truth_per_nval,
             "rmse_to_kf" => rrkf_rmse_to_kf_per_nval,
             "cov_distance" => rrkf_cov_distance_per_nval,
+            "bench" => rrkf_bench_per_nval,
         ),
         "enkf" => Dict(
             "rmse_to_truth" => enkf_rmse_to_truth_per_nval,
             "rmse_to_kf" => enkf_rmse_to_kf_per_nval,
             "cov_distance" => enkf_cov_distance_per_nval,
+            "bench" => enkf_bench_per_nval,
         ),
         "etkf" => Dict(
             "rmse_to_truth" => etkf_rmse_to_truth_per_nval,
             "rmse_to_kf" => etkf_rmse_to_kf_per_nval,
             "cov_distance" => etkf_cov_distance_per_nval,
+            "bench" => etkf_bench_per_nval,
         ),
         "kf" => Dict(
-            "rmse_to_truth" => kf_rmse_to_truth_per_nval,
+            "rmse_to_truth" => kf_rmse_to_truth,
+            "bench" => 41.078822
         ),
     )
 )
+
