@@ -1,6 +1,7 @@
 using JLD2
 # using TuePlots
 using Statistics
+using BenchmarkTools
 using CairoMakie
 using LaTeXStrings
 
@@ -16,14 +17,14 @@ to_seconds(tm) = tm / 1e9
 include("../plot_theme.jl")
 
 
-WIDTH, HEIGHT = FULL_WIDTH, 1.3FULL_HEIGHT
+WIDTH, HEIGHT = FULL_WIDTH, 1.2FULL_HEIGHT
 
 
 fig = begin
 
     grid_plot = Figure(;
         resolution=(WIDTH, HEIGHT),
-        figure_padding=1,
+        figure_padding=(5, 15, 1, 1),
     )
 
     rmse_axes = []
@@ -41,7 +42,7 @@ fig = begin
                 xgridvisible = false,
                 ygridvisible = false,
                 xticklabelsvisible=true,
-                aspect=1.5,
+                aspect=1.,
                 xlabel="Wall time [sec]",
                 # title="vs. KF mean",
                 titlesize=BASE_FONTSIZE - 3,
@@ -111,7 +112,9 @@ fig = begin
     end
 
     Legend(grid_plot[0, :], legend_handles, [rich("RRKF (ours)", font="Times New Roman bold"), "EnKF", "ETKF", "cumulative spectrum"], orientation=:horizontal)
-
+    colgap!(grid_plot.layout, 2.0)
+    rowgap!(grid_plot.layout, 0.0)
+    rowgap!(grid_plot.layout, 1, 8.0)
 
     linkyaxes!(rmse_axes...)
 

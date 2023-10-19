@@ -15,7 +15,7 @@ loaded_LA_results = load("./out/LA_err_runtime.jld2")
 include("../plot_theme.jl")
 
 
-WIDTH, HEIGHT = FULL_WIDTH, FULL_HEIGHT
+WIDTH, HEIGHT = 0.45FULL_WIDTH, FULL_HEIGHT
 
 to_seconds(tm) = tm / 1e9
 
@@ -23,7 +23,7 @@ to_seconds(tm) = tm / 1e9
 fig = begin
     grid_plot = Figure(;
         resolution=(WIDTH, HEIGHT),
-        figure_padding=1,
+        figure_padding=2,
     )
 
     ax_rmse_kf = Axis(
@@ -38,8 +38,8 @@ fig = begin
         # xlabel="Low-rank dim.",
         aspect=1.0,
         # ylabel="RMSE",
-        title="Error vs. runtime",
-        titlegap=2.0,
+        # title="Error vs. runtime",
+        # titlegap=2.0,
         titlesize=BASE_FONTSIZE-2,
         titlealign=:center,
     )
@@ -103,18 +103,18 @@ fig = begin
     # )
 
 
-    # CairoMakie.scatter!(
-    #     ax_rmse_kf,
-    #     loaded_LA_results["nval_list"][end-4:end],
-    #     loaded_LA_results["rrkf"]["rmse_to_kf"][end-4:end],
-    #     marker=:diamond,
-    #     color=COLORS[4],
-    #     strokecolor=:black,
-    #     strokewidth=0.5,
-    #     zorder=10,
-    #     # glowwidth=20,
-    #     # glowcolor=PN_COLORS[1],
-    # )
+    CairoMakie.scatter!(
+        ax_rmse_kf,
+        collect(map(to_seconds ∘ time ∘ mean, loaded_LA_results["rrkf"]["bench"]))[end-4:end],
+        loaded_LA_results["rrkf"]["rmse_to_kf"][end-4:end],
+        marker=:diamond,
+        color=COLORS[4],
+        strokecolor=:black,
+        strokewidth=0.5,
+        zorder=10,
+        # glowwidth=20,
+        # glowcolor=PN_COLORS[1],
+    )
     # CairoMakie.scatter!(
     #     ax_cov_dist,
     #     loaded_LA_results["nval_list"][end-4:end],
@@ -136,7 +136,12 @@ fig = begin
     ax_rmse_kf.ylabel = "RMSE"
     ax_rmse_kf.xlabelpadding=0.0
 
-    Label(grid_plot[1, :, Bottom()], "Wall time [sec] ", fontsize=BASE_FONTSIZE-1, font="Times New Roman regular", halign = :center, valign=:top, padding=(0, 0, 0, 15))
+    Legend(grid_plot[1, 2], [rrkf_legend_handle, enkf_legend_handle, etkf_legend_handle], [rich(rich("RRKF", font="Times New Roman bold"), "\n", rich("(ours)", font="Times New Roman bold", offset = (0.0, 1.0))), "EnKF", "ETKF"])
+    # axislegend(ax_rmse_kf, [rrkf_legend_handle, enkf_legend_handle, etkf_legend_handle], [rich(rich("RRKF", font="Times New Roman bold"), "\n", rich("(ours)", font="Times New Roman bold", offset = (0.0, 1.0))), "EnKF", "ETKF"])
+    colgap!(grid_plot.layout, 0.0)
+    # colgap!(grid_plot.layout, 2, 5.0)
+
+    Label(grid_plot[1, 1, Bottom()], "Wall time [sec] ", fontsize=BASE_FONTSIZE-1, font="Times New Roman regular", halign = :center, valign=:top, padding=(0, 0, 0, 15))
 
     # resize_to_layout!(grid_plot)
 
