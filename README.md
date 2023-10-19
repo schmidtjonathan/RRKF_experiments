@@ -10,6 +10,6 @@ Dynamical-Low-Rank Filtering In High Dimensions"* ([arXiv](http://arxiv.org/abs/
 </div>
 
 
-## Paper code
+## Source code
 
 Please find the source code used by the experiments [here](https://github.com/schmidtjonathan/RRKF.jl) (https://github.com/schmidtjonathan/RRKF.jl).
