@@ -5,7 +5,7 @@ Dynamical-Low-Rank Filtering In High Dimensions"* ([arXiv](http://arxiv.org/abs/
 
 <div align="center">
 
-![Figure1](./docs/assets/fig1.png)
+![Figure1](./experiments/Figure1/out/fig1.png)
 
 </div>
 
