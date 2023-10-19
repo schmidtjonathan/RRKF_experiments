@@ -191,24 +191,6 @@ rrkf_norm_errors = abs.(rrkf_means .- evaluate_normalized_data_mat)
 rrkf_zscores = (rrkf_means .- evaluate_normalized_data_mat) ./ rrkf_stds
 
 
-# save(
-#     "./out/rrkf-r$(rrkf_NVALS)_results.jld2",
-#     Dict(
-#         "rrkf_means_datascale" => rescaled_rrkf_means,
-#         "rrkf_stds_datascale" => rescaled_rrkf_stds,
-#         "rrkf_means_normscale" => rrkf_means,
-#         "rrkf_stds_normscale" => rrkf_stds,
-#         "rrkf_absolute_errors_datascale" => rrkf_absolute_errors,
-#         "rrkf_absolute_errors_normscale" => rrkf_norm_errors,
-#         "rrkf_zscores" => rrkf_zscores,
-#         "prior_parameters" => minimizer,
-#         "elapsed_time" => rrkf_estim_stats.time,
-#         "prior_hparams" => minimizer,
-#         "date_range" => evaluate_date_range,
-#     )
-# )
-
-
 function borders!(p)
     plot!(p, australia_shape; fillalpha=0, linewidth=3.0)
     return p
